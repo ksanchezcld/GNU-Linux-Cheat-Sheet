@@ -1,0 +1,37 @@
+Restringir el acceso de usuario a un directorio con SFTP (OpenSSH)
+
+# adduser --home /directorio/home/del/usuario nombredeusuario
+-> adduser --home /backup_files ksanchez
+-> chown ksanchez:ksanchez /backup_files/
+-> chmod 755 /backup_files
+-> vim /etc/ssh/sshd_config
+
+# Localizamos la línea Subsystem sftp /usr/lib/openssh/sftp-server y le añadimos una almohadilla (#) delante para comentarla. A continuación agregamos debajo esta nueva instrucción: Subsystem sftp internal-sftp
+
+-> Match User ksanchez
+    ChrootDirectory /backup_files
+    AllowTCPForwarding no
+    X11Forwarding no
+    ForceCommand internal-sftp
+
+
+
+
+
+usermod backupexec -g sftponly
+service sshd restart
+usermod backupexec -s /bin/false
+usermod backupexec -d /backup_db
+usermod backupexec -d /backup_db
+
+vim /etc/ssh/sshd_config
+
+service sshd restart   
+
+http://www.cyberciti.biz/tips/openssh-deny-or-restrict-access-to-users-and-groups.html
+http://www.cyberciti.biz/tips/howto-linux-shell-restricting-access.html
+http://unix.stackexchange.com/questions/9853/restricting-an-ssh-scp-sftp-user-to-a-directory
+http://dariobf.com/restringir-acceso-usuario-directorio-sftp-openssh/
+http://www.hypexr.org/linux_scp_help.php
+http://blog.skufel.net/2011/12/automating-file-transfer-via-sftp-i-ftps-using-winscp/
+http://www.cyberciti.biz/tips/linux-unix-bsd-openssh-server-best-practices.html

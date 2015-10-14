@@ -1,0 +1,114 @@
+Default Config Files and SSH Port
+
+    /etc/ssh/sshd_config - OpenSSH server configuration file.
+    /etc/ssh/ssh_config - OpenSSH client configuration file.
+    ~/.ssh/ - Users ssh configuration directory.
+    ~/.ssh/authorized_keys or ~/.ssh/authorized_keys - Lists the public keys (RSA or DSA) that can be used to log into the user’s account
+    /etc/nologin - If this file exists, sshd refuses to let anyone except root log in.
+    /etc/hosts.allow and /etc/hosts.deny : Access controls lists that should be enforced by tcp-wrappers are defined here.
+    SSH default port : TCP 22
+
+#Disable OpenSSH Server
+->chkconfig sshd off
+->yum erase openssh-server
+->apt-get remove openssh-server
+
+#Only Use SSH Protocol 2
+->Protocol 2
+
+#Limit Users' SSH Access
+->AllowUsers root vivek jerry
+->DenyUsers saroj anjali foo
+
+#Configure Idle Log Out Timeout Interval
+->ClientAliveInterval 300
+->ClientAliveCountMax 0
+
+#Disable .rhosts Files
+->IgnoreRhosts yes
+
+#Disable Host-Based Authentication
+->HostbasedAuthentication no
+
+#Disable root Login via SSH
+->PermitRootLogin no
+
+#Enable a Warning Banner
+->Banner /etc/issue
+
+#Firewall SSH Port # 22
+-> A RH-Firewall-1-INPUT -s 192.168.1.0/24 -m state --state NEW -p tcp --dport 22 -j ACCEPT
+-> A RH-Firewall-1-INPUT -s 202.54.1.5/29 -m state --state NEW -p tcp --dport 22 -j ACCEPT
+IPV6
+-A RH-Firewall-1-INPUT -s ipv6network::/ipv6mask -m tcp -p tcp --dport 22 -j ACCEPT
+
+#Change SSH Port and Limit IP Binding
+->Port 300
+->ListenAddress 192.168.1.5
+->ListenAddress 202.54.1.5
+
+#Use Strong SSH Passwords and Passphrase
+#Use Public Key Based Authentication
+#Use Keychain Based Authentication
+#Chroot SSHD (Lock Down Users To Their Home Directories)
+->Subsystem sftp internal-sftp
+-> Match group sftponly
+         ChrootDirectory /home/%u
+         X11Forwarding no
+         AllowTcpForwarding no
+         ForceCommand internal-sftp
+->chown root.root /home/user
+->usermod -d / user
+->adduser user sftponly
+
+#Use TCP Wrappers
+sshd : 192.168.1.2 172.16.23.12
+
+#Disable Empty Passwords
+->PermitEmptyPasswords no
+
+#Thwart SSH Crackers (Brute Force Attack)
+#Rate-limit Incoming Port # 22 Connections
+[SCRIPT]
+#!/bin/bash
+inet_if=eth1
+ssh_port=22
+$IPT -I INPUT -p tcp --dport ${ssh_port} -i ${inet_if} -m state --state NEW -m recent  --set
+$IPT -I INPUT -p tcp --dport ${ssh_port} -i ${inet_if} -m state --state NEW -m recent  --update --seconds 60 --hitcount 5 -j DROP
+
+[IPTABLES]
+$IPT -A INPUT  -i ${inet_if} -p tcp --dport ${ssh_port} -m state --state NEW -m limit --limit 3/min --limit-burst 3 -j ACCEPT
+$IPT -A INPUT  -i ${inet_if} -p tcp --dport ${ssh_port} -m state --state ESTABLISHED -j ACCEPT
+$IPT -A OUTPUT -o ${inet_if} -p tcp --sport ${ssh_port} -m state --state ESTABLISHED -j ACCEPT
+# another one line example
+# $IPT -A INPUT -i ${inet_if} -m state --state NEW,ESTABLISHED,RELATED -p tcp --dport 22 -m limit --limit 5/minute --limit-burst 5-j ACCEPT
+
+#Use Port Knocking
+#Use Log Analyzer
+->LogLevel INFO
+
+#Patch OpenSSH and Operating Systems
+----------------------------------------------------------------------------------------------
+You are accessing a XYZ Government (XYZG) Information System (IS) that is provided for authorized use only.
+By using this IS (which includes any device attached to this IS), you consent to the following conditions:
++ The XYZG routinely intercepts and monitors communications on this IS for purposes including, but not limited to,
+penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM),
+law enforcement (LE), and counterintelligence (CI) investigations.
++ At any time, the XYZG may inspect and seize data stored on this IS.
++ Communications using, or data stored on, this IS are not private, are subject to routine monitoring,
+interception, and search, and may be disclosed or used for any XYZG authorized purpose.
++ This IS includes security measures (e.g., authentication and access controls) to protect XYZG interests--not
+for your personal benefit or privacy.
++ Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching
+or monitoring of the content of privileged communications, or work product, related to personal representation
+or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work
+product are private and confidential. See User Agreement for details.
+----------------------------------------------------------------------------------------------
+Top 20 OpenSSH Server Best Security Practices
+	-http://www.cyberciti.biz/tips/linux-unix-bsd-openssh-server-best-practices.html
+
+http://www.debian-administration.org/article/590/OpenSSH_SFTP_chroot_with_ChrootDirectory   --> Me funciono con esta guia.
+http://www.cyberciti.biz/faq/block-ssh-attacks-with-denyhosts/
+http://www.openssh.com/
+http://nixcraft.com/networking-firewalls-security/726-failed-ssh-login-attempts-how-avoid-brute-ssh-attacks.html
+http://kojoney.sourceforge.net/

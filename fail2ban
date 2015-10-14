@@ -1,0 +1,8 @@
+Fail2ban is one of the most popular open source intrusion detection/prevention framework written in python programming language. It operates by scanning log files such as /var/log/secure, /var/log/auth.log, /var/log/pwdfail etc. for too many failed login attempts. Fail2ban used to update Netfilter/iptables or TCP Wrapper’s hosts.deny file, to reject an attacker’s IP address for a set amount of time. It also has a ability to unban a blocked IP address for a certain period of time set by administrators. However, an certain minutes of unban is more enough to stop such malicious attacks.
+Fail2Ban Features
+
+    Multi-threaded and Highly configurable.
+    Support for log files rotation and can handle multiple services like (sshd, vsftpd, apache, etc).
+    Monitors log files and looks for known and unknown patterns.
+    Uses Netfilter/Iptables and TCP Wrapper (/etc/hosts.deny) table to ban attackers IP.
+    Runs scripts when a given pattern has been identified for the same IP address for more than X times.
