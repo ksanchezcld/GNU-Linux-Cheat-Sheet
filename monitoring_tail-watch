@@ -1,0 +1,12 @@
+tail -f /folder/file
+tail -10 /folder/file
+tail -f /tmp/logs/
+tail -f 1.txt 2.txt 3.txt
+
+
+
+watch "ls -l | tail -10"
+watch "ls -l"
+
+
+ ls -drt /var/log/* | tail -n5 | xargs tail -F
