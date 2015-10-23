@@ -10,3 +10,6 @@ watch "ls -l"
 
 
  ls -drt /var/log/* | tail -n5 | xargs tail -F
+
+
+ http://unix.stackexchange.com/questions/155274/open-a-directory-and-let-it-update-itself-using-tail-f
