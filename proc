@@ -1,0 +1,67 @@
+Folder where memory save information in runtime
+
+cat /proc/[proc_pid]/maps
+
+[Randomization when an app run in memory]
+
+-> cat /proc/sys/kernel/randomize_va_space
+		- Set to 1 (enabled)
+
+[CPU INFO]
+-> cat /proc/cpuinfo
+
+[CPU MEM INFO]
+-> cat /proc/meminfo
+
+
+[MEMORY STRUCTURE]
+
+	--------- 0xFFFFF
+	| STACK |
+    ---------
+    ---------
+	| UNUSED |
+	| MEMORY |
+    ---------
+    ---------
+	|  HEAP |
+    ---------
+    ----------------
+	| UNITIALIZED  |
+	|     DATA     |
+    ----------------
+    ---------
+	| DATA  |
+    ---------
+    ---------
+	| TEXT  |
+    --------- 0x00000
+
+
+[SAMPLES]
+
+-> kurokysan: ~ $ cat /proc/1738/maps
+
+00400000-0040b000 r-xp 00000000 ca:01 41663                              /bin/cat
+0060a000-0060b000 r--p 0000a000 ca:01 41663                              /bin/cat
+0060b000-0060c000 rw-p 0000b000 ca:01 41663                              /bin/cat
+00d9d000-00dbe000 rw-p 00000000 00:00 0                                  [heap]
+7f3ead830000-7f3ead9eb000 r-xp 00000000 ca:01 59276                      /lib/x86_64-linux-gnu/libc-2.19.so
+7f3ead9eb000-7f3eadbea000 ---p 001bb000 ca:01 59276                      /lib/x86_64-linux-gnu/libc-2.19.so
+7f3eadbea000-7f3eadbee000 r--p 001ba000 ca:01 59276                      /lib/x86_64-linux-gnu/libc-2.19.so
+7f3eadbee000-7f3eadbf0000 rw-p 001be000 ca:01 59276                      /lib/x86_64-linux-gnu/libc-2.19.so
+7f3eadbf0000-7f3eadbf5000 rw-p 00000000 00:00 0
+7f3eadbf5000-7f3eadc18000 r-xp 00000000 ca:01 59273                      /lib/x86_64-linux-gnu/ld-2.19.so
+7f3eade09000-7f3eade0c000 rw-p 00000000 00:00 0
+7f3eade15000-7f3eade17000 rw-p 00000000 00:00 0
+7f3eade17000-7f3eade18000 r--p 00022000 ca:01 59273                      /lib/x86_64-linux-gnu/ld-2.19.so
+7f3eade18000-7f3eade19000 rw-p 00023000 ca:01 59273                      /lib/x86_64-linux-gnu/ld-2.19.so
+7f3eade19000-7f3eade1a000 rw-p 00000000 00:00 0
+7fff25c49000-7fff25c6a000 rw-p 00000000 00:00 0                          [stack]
+7fff25dfe000-7fff25e00000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
+-> kill -9 1738
+
+-> kurokysan: ~ $ cat /proc/1738/maps                                                                                    
+cat: /proc/1738/maps: No such file or directory
